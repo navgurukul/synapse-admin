@@ -4,15 +4,16 @@ export default {
   ...englishMessages,
   synapseadmin: {
     auth: {
+      homeserver: "Homeserver",
+      welcome: "Welcome to Navgurukul Admin",
       base_url: "Homeserver URL",
-      welcome: "Welcome to Synapse-admin",
       username_error: "Please enter fully qualified user ID: '@user:domain'",
       protocol_error: "URL has to start with 'http://' or 'https://'",
       url_error: "Not a valid Matrix server URL",
     },
     users: {
       invalid_user_id:
-        "Must be a fully qualified Matrix user-id, e.g. @user_id:homeserver",
+        "Please enter a proper username.",
     },
     rooms: {
       tabs: {
@@ -112,8 +113,8 @@ export default {
         admin: "Server Administrator",
         deactivated: "Deactivated",
         guests: "Show guests",
-        show_deactivated: "Show deactivated users",
-        user_id: "Search user",
+        show_deactivated: "Show deactivated members",
+        user_id: "Search Member",
         displayname: "Displayname",
         password: "Password",
         avatar_url: "Avatar URL",
@@ -129,7 +130,7 @@ export default {
         erase: "Mark the user as GDPR-erased",
       },
       action: {
-        erase: "Erase user data",
+        erase: "Erase member data",
       },
     },
     rooms: {

@@ -186,10 +186,14 @@ export const UserList = props => {
 
 // https://matrix.org/docs/spec/appendices#user-identifiers
 const validateUser = regex(
-  /^@[a-z0-9._=\-/]+:.*/,
+  /^[a-z0-9._=\-/][a-z0-9._=\-/][a-z0-9._=\-/][a-z0-9._=\-/][a-z0-9._=\-/]+/,
   "synapseadmin.users.invalid_user_id"
 );
 
+const validateEmail = regex(
+  /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+\.+([a-zA-Z0-9-][a-zA-Z0-9-]+)*$/,
+  "Enter Proper Email Address"  
+);
 export function generateRandomUser() {
   const homeserver = localStorage.getItem("home_server");
   const user_id =
@@ -252,7 +256,9 @@ export const UserCreate = props => (
       <TextInput source="displayname" />
       <PasswordInput source="password" autoComplete="new-password" />
       <BooleanInput source="admin" />
-      <ArrayInput source="threepids">
+      <TextInput source="email" autoComplete="off" validate={validateEmail}/>
+      <TextInput source="msisdn" autoComplete="off" />
+      {/* <ArrayInput source="threepids">
         <SimpleFormIterator>
           <SelectInput
             source="medium"
@@ -260,10 +266,11 @@ export const UserCreate = props => (
               { id: "email", name: "resources.users.email" },
               { id: "msisdn", name: "resources.users.msisdn" },
             ]}
+            key="SelectInput"
           />
-          <TextInput source="address" />
+          <TextInput source="address" key="TextInput"/>
         </SimpleFormIterator>
-      </ArrayInput>
+      </ArrayInput> */}
     </SimpleForm>
   </Create>
 );
@@ -330,8 +337,9 @@ export const UserEdit = props => {
                   { id: "email", name: "resources.users.email" },
                   { id: "msisdn", name: "resources.users.msisdn" },
                 ]}
+                key="SelectInput"
               />
-              <TextInput source="address" />
+              <TextInput source="address" key="TextInput"/>
             </SimpleFormIterator>
           </ArrayInput>
         </FormTab>

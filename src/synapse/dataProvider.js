@@ -14,6 +14,17 @@ const jsonClient = (url, options = {}) => {
   return fetchUtils.fetchJson(url, options);
 };
 
+const c_to_id = (user_name, resource) => {
+  if (user_name.indexOf('navgurukul.org')>-1)
+    return user_name;
+
+  if (resource === 'users' || resource=== "connections")
+    return '@'+ user_name +':navgurukul.org';
+  else if (resource === 'rooms')
+    return '#' + user_name + ':navgurukul.org';
+
+  return user_name;
+}
 const mxcUrlToHttp = mxcUrl => {
   const homeserver = localStorage.getItem("base_url");
   const re = /^mxc:\/\/([^/]+)\/(\w+)/;
@@ -30,7 +41,7 @@ const resourceMap = {
     path: "/_synapse/admin/v2/users",
     map: u => ({
       ...u,
-      id: u.name,
+      id: u.name.split(':')[0].slice(1),
       avatar_src: mxcUrlToHttp(u.avatar_url),
       is_guest: !!u.is_guest,
       admin: !!u.admin,
@@ -46,7 +57,7 @@ const resourceMap = {
       method: "PUT",
     }),
     delete: params => ({
-      endpoint: `/_synapse/admin/v1/deactivate/${params.id}`,
+      endpoint: `/_synapse/admin/v1/deactivate/${c_to_id(params.id, 'users')}`,
       body: { erase: true },
       method: "POST",
     }),
@@ -101,7 +112,7 @@ const resourceMap = {
     path: "/_synapse/admin/v1/whois",
     map: c => ({
       ...c,
-      id: c.user_id,
+      id: c_to_id(c.user_id),
     }),
     data: "connections",
   },
@@ -241,6 +252,7 @@ const dataProvider = {
     if (!homeserver || !(resource in resourceMap)) return Promise.reject();
 
     const res = resourceMap[resource];
+    params.id = c_to_id(params.id, resource);
 
     const endpoint_url = homeserver + res.path;
     return jsonClient(`${endpoint_url}/${params.id}`).then(({ json }) => ({
@@ -257,7 +269,12 @@ const dataProvider = {
 
     const endpoint_url = homeserver + res.path;
     return Promise.all(
-      params.ids.map(id => jsonClient(`${endpoint_url}/${id}`))
+      params.ids.map(
+        id => {
+          console.log(id);
+          return jsonClient(`${endpoint_url}/${c_to_id(id, resource)}`)
+        }
+      )
     ).then(responses => ({
       data: responses.map(({ json }) => res.map(json)),
       total: responses.length,
@@ -295,7 +312,7 @@ const dataProvider = {
     const res = resourceMap[resource];
 
     const endpoint_url = homeserver + res.path;
-    return jsonClient(`${endpoint_url}/${params.data.id}`, {
+    return jsonClient(`${endpoint_url}/${c_to_id(params.data.id, resource)}`, {
       method: "PUT",
       body: JSON.stringify(params.data, filterNullValues),
     }).then(({ json }) => ({
@@ -312,7 +329,7 @@ const dataProvider = {
 
     const endpoint_url = homeserver + res.path;
     return Promise.all(
-      params.ids.map(id => jsonClient(`${endpoint_url}/${id}`), {
+      params.ids.map(id => jsonClient(`${endpoint_url}/${c_to_id(id, resource)}`), {
         method: "PUT",
         body: JSON.stringify(params.data, filterNullValues),
       })
@@ -327,7 +344,17 @@ const dataProvider = {
     if (!homeserver || !(resource in resourceMap)) return Promise.reject();
 
     const res = resourceMap[resource];
+
     if (!("create" in res)) return Promise.reject();
+
+    params.data.id = c_to_id(params.data.id, resource);
+    params.data.threepids=[];
+
+    if (params.data.email)
+      params.data.threepids.push({"medium": "email", "address": params.data.email})
+
+    if (params.data.msisdn)
+      params.data.threepids.push({"medium": "msisdn", "address": params.data.msisdn})
 
     const create = res["create"](params.data);
     const endpoint_url = homeserver + create.endpoint;
@@ -372,6 +399,9 @@ const dataProvider = {
     if ("delete" in res) {
       const del = res["delete"](params);
       const endpoint_url = homeserver + del.endpoint;
+
+      console.log(23, del.body);
+
       return jsonClient(endpoint_url, {
         method: "method" in del ? del.method : "DELETE",
         body: "body" in del ? JSON.stringify(del.body) : null,
@@ -379,6 +409,7 @@ const dataProvider = {
         data: json,
       }));
     } else {
+      console.log(12, params);
       const endpoint_url = homeserver + res.path;
       return jsonClient(`${endpoint_url}/${params.id}`, {
         method: "DELETE",
@@ -390,7 +421,7 @@ const dataProvider = {
   },
 
   deleteMany: (resource, params) => {
-    console.log("deleteMany " + resource);
+    console.log("deleteMany " + resource, params);
     const homeserver = localStorage.getItem("base_url");
     if (!homeserver || !(resource in resourceMap)) return Promise.reject();
 
@@ -401,6 +432,7 @@ const dataProvider = {
         params.ids.map(id => {
           const del = res["delete"]({ ...params, id: id });
           const endpoint_url = homeserver + del.endpoint;
+          console.log(endpoint_url);
           return jsonClient(endpoint_url, {
             method: "method" in del ? del.method : "DELETE",
             body: "body" in del ? JSON.stringify(del.body) : null,
@@ -411,12 +443,15 @@ const dataProvider = {
       }));
     } else {
       const endpoint_url = homeserver + res.path;
+      console.log(endpoint_url);
       return Promise.all(
-        params.ids.map(id =>
-          jsonClient(`${endpoint_url}/${id}`, {
-            method: "DELETE",
-            body: JSON.stringify(params.data, filterNullValues),
-          })
+        params.ids.map(id => {
+            console.log(id);
+            return jsonClient(`${endpoint_url}/${c_to_id(id, resource)}`, {
+              method: "DELETE",
+              body: JSON.stringify(params.data, filterNullValues),
+            })
+          }
         )
       ).then(responses => ({
         data: responses.map(({ json }) => json),

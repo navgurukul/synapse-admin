@@ -5,8 +5,8 @@ import {
   Notification,
   useLogin,
   useNotify,
-  useLocale,
-  useSetLocale,
+  // useLocale,
+  // useSetLocale,
   useTranslate,
   PasswordInput,
   TextInput,
@@ -18,8 +18,8 @@ import {
   Card,
   CardActions,
   CircularProgress,
-  MenuItem,
-  Select,
+  // MenuItem,
+  // Select,
   TextField,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -78,10 +78,10 @@ const LoginPage = ({ theme }) => {
   const login = useLogin();
   const notify = useNotify();
   const [loading, setLoading] = useState(false);
-  var locale = useLocale();
-  const setLocale = useSetLocale();
+  // var locale = useLocale();
+  // const setLocale = useSetLocale();
   const translate = useTranslate();
-  const base_url = localStorage.getItem("base_url");
+  const base_url = "https://m.navgurukul.org";
 
   const renderInput = ({
     meta: { touched, error } = {},
@@ -143,6 +143,7 @@ const LoginPage = ({ theme }) => {
   };
 
   const UserData = ({ formData }) => {
+
     const form = useForm();
     const [serverVersion, setServerVersion] = useState("");
 
@@ -244,19 +245,6 @@ const LoginPage = ({ theme }) => {
                 {translate("synapseadmin.auth.welcome")}
               </div>
               <div className={classes.form}>
-                <div className={classes.input}>
-                  <Select
-                    value={locale}
-                    onChange={e => {
-                      setLocale(e.target.value);
-                    }}
-                    fullWidth
-                    disabled={loading}
-                  >
-                    <MenuItem value="de">Deutsch</MenuItem>
-                    <MenuItem value="en">English</MenuItem>
-                  </Select>
-                </div>
                 <FormDataConsumer>
                   {formDataProps => <UserData {...formDataProps} />}
                 </FormDataConsumer>

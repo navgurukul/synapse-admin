@@ -242,7 +242,7 @@ const RoomFilter = ({ ...props }) => {
 };
 
 const FilterableRoomList = ({ ...props }) => {
-  const filter = props.roomFilters;
+  const filter = props.roomfilters;
   const localMembersFilter =
     filter && filter.joined_local_members ? true : false;
   const stateEventsFilter = filter && filter.state_events ? true : false;
@@ -283,7 +283,7 @@ const FilterableRoomList = ({ ...props }) => {
 
 function mapStateToProps(state) {
   return {
-    roomFilters: state.admin.resources.rooms.list.params.displayedFilters,
+    roomfilters: state.admin.resources.rooms.list.params.displayedFilters,
   };
 }
 
