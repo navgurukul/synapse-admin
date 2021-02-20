@@ -16,5 +16,5 @@ deploy:
   strategy: git
   local_dir: build
   on:
-    branch: master
+    branch: main
   edge: true
